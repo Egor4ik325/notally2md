@@ -1,5 +1,8 @@
 from pathlib import Path
+from datetime import datetime
+
 import xmltodict
+from slugify import slugify
 
 
 def create_notes(base_path, notes, dir_name):
@@ -10,12 +13,26 @@ def create_notes(base_path, notes, dir_name):
     notes_notes = notes.get('note')
     if notes_notes:
         for i, note in enumerate(notes_notes):
-            note_path = notes_path / f'note_{i}.md'
+            note_title = note.get('title')
+            note_body = note.get('body')
+            note_timestamp_created = int(note.get('date-created'))
+            note_date_created = datetime.fromtimestamp(
+                note_timestamp_created / 1e3)
+
+            # Determine file name based on title or body
+            if note_title:
+                date_created = note_date_created.strftime(r'%Y%m%d')
+                title_slug = slugify(note_title)
+                filename = f'{title_slug}-{date_created}'
+            elif note_body:
+                body_first_line = note_body.split('\n', 1)[0]
+                filename = slugify(body_first_line)
+
+            # filename = f'note_{i}'
+            note_path = notes_path / f'{filename}.md'
             with open(note_path, 'wt') as f:
-                note_title = note.get('title')
                 if note_title:
                     f.write(f'# {note_title }\n\n')
-                note_body = note.get('body')
                 if note_body:
                     f.write(note_body)
 
@@ -70,10 +87,10 @@ if __name__ == "__main__":
             if notes is not None:
                 create_notes(export_path, notes, 'notes')
 
-            archived_notes = exported_notes.get('archived-notes')
-            if archived_notes is not None:
-                create_notes(export_path, archived_notes, 'archived-notes')
+            # archived_notes = exported_notes.get('archived-notes')
+            # if archived_notes is not None:
+            #     create_notes(export_path, archived_notes, 'archived-notes')
 
-            deleted_notes = exported_notes.get('deleted-notes')
-            if deleted_notes is not None:
-                create_notes(export_path, deleted_notes, 'deleted-notes')
+            # deleted_notes = exported_notes.get('deleted-notes')
+            # if deleted_notes is not None:
+            #     create_notes(export_path, deleted_notes, 'deleted-notes')
