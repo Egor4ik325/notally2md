@@ -11,7 +11,7 @@ This program converts Notally backup *XML structure* into similar *filesystem st
 
 ## Backup XML document structure
 
-```xml
+```XML
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <exported-notes>
     <notes>
